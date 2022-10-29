@@ -2,7 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 5000
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion } = require('mongodb'); /* install mongoDB */
 
 app.use(cors())/* to solve cors policy issue */
 app.use(express.json())/* to get data from client side */
@@ -18,18 +18,19 @@ const users = [
     { id: 4, name: 'rohan', email: 'rohan@gmail.com' }
 ]
 
-app.get('/users', (req, res) => {
-    // console.log(req.query)
-    // filter users by name as query
-    if (req.query.name) {
-        const search = req.query.name
-        const filteredUser = users.filter(user => user.name.indexOf(search) >= 0)
-        res.send(filteredUser)
-    }
-    else {
-        res.send(users)
-    }
-})
+// app.get('/users', (req, res) => {
+//     // console.log(req.query)
+
+//     // filter users by name as query
+//     if (req.query.name) {
+//         const search = req.query.name
+//         const filteredUser = users.filter(user => user.name.indexOf(search) >= 0)
+//         res.send(filteredUser)
+//     }
+//     else {
+//         res.send(users)
+//     }
+// })
 
 // /* get data from client side */
 // app.post('/users', (req, res) => {
@@ -43,11 +44,15 @@ app.get('/users', (req, res) => {
 // })
 
 
-/* integrate mongoDB with server */
+/*-----------------------------
+ integrate mongoDB with server 
+ -----------------------------*/
 const uri = "mongodb+srv://mostafiz:9Movn96GNAGBl8Gd@cluster0.mniec4l.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-/* add new data to mongoDB */
+/*-----------------------
+ add new data to mongoDB 
+ -----------------------*/
 async function run() {
     try {
         const userCollection = client.db('ExploreNode').collection('users');
@@ -55,14 +60,24 @@ async function run() {
         // const result = await userCollection.insertOne(user);
         // console.log(result);
 
-        /* get data from client side */
+        /*-------------------------------------------------
+        get data from MongoDB and client side, save data to MongoDB and show/display in UI --------------------------------------------------*/
+        app.get('/users', async (req, res) => {
+            const cursor = userCollection.find({})
+            const users = await cursor.toArray();
+            res.send(users);
+        })
+
+        /*-----------------------------
+         get data from client side 
+         -----------------------------*/
         app.post('/users', async (req, res) => {
             // console.log('post api called')
             const user = req.body
             // user.id = users.length + 1;
             // users.push(user)
             const result = await userCollection.insertOne(user);
-            user.id = result.insertedId;
+            user._id = result.insertedId;
             res.send(user)
             // console.log(req.body)
             console.log(user)
