@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 5000
+const { MongoClient, ServerApiVersion } = require('mongodb');
 
 app.use(cors())/* to solve cors policy issue */
 app.use(express.json())/* to get data from client side */
@@ -40,6 +41,18 @@ app.post('/users', (req, res) => {
     // console.log(req.body)
     console.log(user)
 })
+
+
+
+const uri = "mongodb+srv://mostafiz:9Movn96GNAGBl8Gd@cluster0.mniec4l.mongodb.net/?retryWrites=true&w=majority";
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+client.connect(err => {
+    const collection = client.db("ExploreNode").collection("users");
+    // perform actions on the collection object
+    console.log('db connected')
+    client.close();
+});
+
 
 app.listen(port, () => {
     console.log(`node server is running on port ${port}`)
