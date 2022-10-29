@@ -31,27 +31,50 @@ app.get('/users', (req, res) => {
     }
 })
 
-/* get data from client side */
-app.post('/users', (req, res) => {
-    // console.log('post api called')
-    const user = req.body
-    user.id = users.length + 1;
-    users.push(user)
-    res.send(user)
-    // console.log(req.body)
-    console.log(user)
-})
+// /* get data from client side */
+// app.post('/users', (req, res) => {
+//     // console.log('post api called')
+//     const user = req.body
+//     user.id = users.length + 1;
+//     users.push(user)
+//     res.send(user)
+//     // console.log(req.body)
+//     console.log(user)
+// })
 
 
-
+/* integrate mongoDB with server */
 const uri = "mongodb+srv://mostafiz:9Movn96GNAGBl8Gd@cluster0.mniec4l.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-client.connect(err => {
-    const collection = client.db("ExploreNode").collection("users");
-    // perform actions on the collection object
-    console.log('db connected')
-    client.close();
-});
+
+/* add new data to mongoDB */
+async function run() {
+    try {
+        const userCollection = client.db('ExploreNode').collection('users');
+        // const user = { name: 'shiuli', email: 'shiuli@gmail.com' }
+        // const result = await userCollection.insertOne(user);
+        // console.log(result);
+
+        /* get data from client side */
+        app.post('/users', async (req, res) => {
+            // console.log('post api called')
+            const user = req.body
+            // user.id = users.length + 1;
+            // users.push(user)
+            const result = await userCollection.insertOne(user);
+            user.id = result.insertedId;
+            res.send(user)
+            // console.log(req.body)
+            console.log(user)
+        })
+
+    }
+    finally {
+
+    }
+}
+
+run().catch(err => console.error(err))
 
 
 app.listen(port, () => {
